@@ -6,16 +6,17 @@ based on Telegram by python3
 In git repo.
 Activate virtualenv
 
-    $ source ./bin/activate
+    source ./bin/activate
 
 Required packages
 
-    $ pip3 install python-telegram-bot --update
+    pip3 install python-telegram-bot --update
+    pip3 install beautifulsoup4
 
 Logout
 
-    $ deactivate
+    deactivate
 
 ### Setup
 
-    $ python3 bot.py
+    python3 main.py

@@ -4,8 +4,7 @@ from telegram.ext import Filters
 from telegram.ext import CommandHandler
 import cmd_description
 import logging
-import url_parse
-
+from url_parse import url_parse
 
 class parse_bot:
   def __init__(self):
@@ -13,9 +12,21 @@ class parse_bot:
       format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
       level=logging.INFO
     )
-    token = '557754452:AAFuMjFF2O80b7B8s7_5n_0ljMeGcYDeHYM'
-    self.updater = Updater(token=token)
+    self.logger = logging.getLogger(__name__)
+    _token = '557754452:AAFuMjFF2O80b7B8s7_5n_0ljMeGcYDeHYM'
+    _request_kwargs = {
+      'proxy_url': 'socks5://78.155.206.64:2016',
+      'urllib3_proxy_kwargs': {
+        'username': 'telegaproxy',
+        'password': 'proxytelega',
+      }
+    }
+
+    # self.updater = Updater(token=_token, request_kwargs=_request_kwargs)
+    self.updater = Updater(token=_token)
     self.dispatcher = self.updater.dispatcher
+    self.parser = url_parse()
+    self.parser.set_depth()
     self.deploy_handlers()
 
   def deploy_handlers(self):
@@ -28,6 +39,12 @@ class parse_bot:
     parse_handler = CommandHandler('link', self.link, pass_args=True)
     self.dispatcher.add_handler(parse_handler)
 
+    depth_handler = CommandHandler('depth', self.depth, pass_args=True)
+    self.dispatcher.add_handler(depth_handler)
+
+    reset_handler = CommandHandler('reset', self.reset)
+    self.dispatcher.add_handler(reset_handler)
+
     stop_handler = CommandHandler('stop', self.stop)
     self.dispatcher.add_handler(stop_handler)
 
@@ -39,19 +56,24 @@ class parse_bot:
     unknown_handler = MessageHandler(Filters.command, self.unknown)
     self.dispatcher.add_handler(unknown_handler)
 
-
   def start(self, bot, update):
     """start this bot and use its features"""
     bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
-  def error(bot, update, error):
-    logger.warning('Update "%s" caused error "%s"', update, error)
+  def error(self, bot, update, error):
+    self.logger.warning('Update "%s" caused error "%s"', update, error)
 
   def help(self, bot, update):
     update.message.reply_text(cmd_description.HELP)
 
   def link(self, bot, update, args):
-    parser = url_parse.url_parse(*args)
+    self.parser.set_link(*args)
+
+  def depth(self, bot, update, args):
+    self.parser.set_depth(*args)
+
+  def reset(self, bot, update):
+    self.parser.reset()
 
   def echo(self, bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.text)
