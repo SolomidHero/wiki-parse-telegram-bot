@@ -3,7 +3,7 @@ from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from telegram.ext import CommandHandler
 
-import statistic
+from statistic import statistic
 import models.cmd_description as cmd_description
 import logging
 from url_parse import url_parse
@@ -28,6 +28,8 @@ class parse_bot:
     self.updater = Updater(token=_token)
     self.dispatcher = self.updater.dispatcher
     self.parser = url_parse()
+    self.stat = statistic()
+
     self.parser.set_depth()
     self.deploy_handlers()
 
@@ -47,6 +49,12 @@ class parse_bot:
     reset_handler = CommandHandler('reset', self.reset)
     self.dispatcher.add_handler(reset_handler)
 
+    top_handler = CommandHandler('top', self.top, pass_args=True)
+    self.dispatcher.add_handler(top_handler)
+
+    stop_words_handler = CommandHandler('stop_words', self.stop_words)
+    self.dispatcher.add_handler(stop_words_handler)
+
     stop_handler = CommandHandler('stop', self.stop)
     self.dispatcher.add_handler(stop_handler)
 
@@ -59,7 +67,6 @@ class parse_bot:
     self.dispatcher.add_handler(unknown_handler)
 
   def start(self, bot, update):
-    """start this bot and use its features"""
     bot.send_message(chat_id=update.message.chat_id, text="I'm a bot, please talk to me!")
 
   def error(self, bot, update, error):
@@ -71,13 +78,29 @@ class parse_bot:
   def link(self, bot, update, args):
     self.parser.set_link(*args)
     self.parser.find_urls()
-    statistic.built_model(self.parser.get_pages_text())
+    self.stat.built_model(self.parser.get_pages_text())
+    update.message.reply_text('Success. Link set. /help')
 
   def depth(self, bot, update, args):
     self.parser.set_depth(*args)
 
   def reset(self, bot, update):
     self.parser.reset()
+    update.message.reply_text('Success. Depth, link and stats reset to default. /help')
+
+  def top(self, bot, update, args):
+    if args[0] == 'asc':
+      update.message.reply_text('Success. Here is the top words. /help\n' +
+                                '\n'.join([f'{key}, {value}' for
+                                  key, value in self.stat.top_asc().items()]))
+    elif args[0] == 'desc':
+      update.message.reply_text('Success. Here is the bot words. /help\n' +
+                                '\n'.join([f'{key}, {value}' for
+                                  key, value in self.stat.top_desc().items()]))
+
+  def stop_words(self, bot, update):
+    update.message.reply_text('Success. Here is stop words. /help\n' +
+                              '\n'.join(self.stat.stop_words()))
 
   def echo(self, bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.text)

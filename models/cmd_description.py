@@ -12,3 +12,5 @@ Hello! There is simple bot which can parse wikipedia very well\n\
 /describe - show data stats\n\
 /describe_word - show word stats\n\
 "
+
+TOP_WORDS_NUMBER = 5

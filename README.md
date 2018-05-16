@@ -12,6 +12,7 @@ Required packages
 
     pip3 install python-telegram-bot --update
     pip3 install beautifulsoup4
+    pip3 install NumPy
 
 Logout
 
