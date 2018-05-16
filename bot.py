@@ -2,7 +2,9 @@ from telegram.ext import Updater
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from telegram.ext import CommandHandler
-import cmd_description
+
+import statistic
+import models.cmd_description as cmd_description
 import logging
 from url_parse import url_parse
 
@@ -68,6 +70,8 @@ class parse_bot:
 
   def link(self, bot, update, args):
     self.parser.set_link(*args)
+    self.parser.find_urls()
+    statistic.built_model(self.parser.get_pages_text())
 
   def depth(self, bot, update, args):
     self.parser.set_depth(*args)
