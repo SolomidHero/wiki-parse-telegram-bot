@@ -1,4 +1,7 @@
 import matplotlib.pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
+from collections import defaultdict
+import models.cmd_description as cmd
 
 def draw_words_freq(model):
   freqs = [i for i in model.values()]
@@ -8,7 +11,7 @@ def draw_words_freq(model):
   plt.ylabel('Number of words')
   plt.xlabel('Frequence')
   plt.grid(True)
-  plt.savefig('./graphics/words_freq.png')
+  plt.savefig(cmd.WORDS_FREQ_IMG)
   plt.clf()
 
 def draw_words_length(model):
@@ -18,5 +21,25 @@ def draw_words_length(model):
   plt.ylabel('Number of words')
   plt.xlabel('Word length')
   plt.grid(True)
-  plt.savefig('./graphics/words_length.png')
+  plt.savefig(cmd.WORDS_LENGTH_IMG)
+  plt.clf()
+
+def draw_wordcloud(model):
+  model = defaultdict(lambda: 0, model)
+  for key in STOPWORDS:
+    if model[key] > 0:
+      model[key] = 0
+
+  wordcloud = WordCloud(
+    max_font_size=100,
+    background_color=None,
+    mode='RGBA',
+    width=800,
+    height=600,
+    colormap=cmd.WORDCLOUD_COLOR
+  ).generate_from_frequencies(model)
+  plt.figure()
+  plt.imshow(wordcloud, interpolation="mitchell")
+  plt.axis("off")
+  plt.savefig(cmd.WORDCLOUD_IMG)
   plt.clf()

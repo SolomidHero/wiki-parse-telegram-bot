@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from statistic import statistic
 import describe
-import models.cmd_description as cmd_description
+import models.cmd_description as cmd
 import logging
 from url_parse import url_parse
 
@@ -44,6 +44,7 @@ class parse_bot:
     top_handler = CommandHandler('top', self.top, pass_args=True)
     stop_words_handler = CommandHandler('stop_words', self.stop_words)
     describe_handler = CommandHandler('describe', self.describe)
+    wordcloud_handler = CommandHandler('cloud', self.wordcloud)
     stop_handler = CommandHandler('stop', self.stop)
     echo_handler = MessageHandler(Filters.text, self.echo)
     unknown_handler = MessageHandler(Filters.command, self.unknown)
@@ -57,6 +58,7 @@ class parse_bot:
     self.dispatcher.add_handler(echo_handler)
     self.dispatcher.add_handler(stop_words_handler)
     self.dispatcher.add_handler(describe_handler)
+    self.dispatcher.add_handler(wordcloud_handler)
     self.dispatcher.add_handler(echo_handler)
     self.dispatcher.add_error_handler(self.error)
     self.dispatcher.add_handler(unknown_handler)
@@ -68,7 +70,7 @@ class parse_bot:
     self.logger.warning('Update "%s" caused error "%s"', update, error)
 
   def help(self, bot, update):
-    update.message.reply_text(cmd_description.HELP)
+    update.message.reply_text(cmd.HELP)
 
   def link(self, bot, update, args):
     self.parser.set_link(*args)
@@ -104,6 +106,13 @@ class parse_bot:
     describe.draw_words_freq(self.stat.get_model())
     describe.draw_words_length(self.stat.get_model())
     update.message.reply_text('Success. Graphics saved. /help')
+    bot.sendPhoto(chat_id=update.message.chat_id, photo=open(cmd.WORDS_FREQ_IMG, 'rb'))
+    bot.sendPhoto(chat_id=update.message.chat_id, photo=open(cmd.WORDS_LENGTH_IMG, 'rb'))
+
+  def wordcloud(self, bot, update):
+    describe.draw_wordcloud(self.stat.get_model())
+    update.message.reply_text('Success. Wordcloud generated. /help')
+    bot.sendPhoto(chat_id=update.message.chat_id, photo=open(cmd.WORDCLOUD_IMG, 'rb'))
 
   def echo(self, bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.text)

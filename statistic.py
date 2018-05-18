@@ -2,12 +2,12 @@ import numpy
 import url_parse
 import re
 import json
-import models.cmd_description as cmd_description
+import models.cmd_description as cmd
 from collections import defaultdict
 
 class statistic:
   def __init__(self):
-    self.top_words_num = cmd_description.TOP_WORDS_NUMBER
+    self.top_words_num = cmd.TOP_WORDS_NUMBER
     with open('models/model.json', 'r') as f:
       self.model = json.load(f)
 

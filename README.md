@@ -13,6 +13,8 @@ Required packages
     pip3 install python-telegram-bot --update
     pip3 install beautifulsoup4
     pip3 install NumPy
+    pip3 install matplotlib
+    pip3 install wordcloud
 
 Logout
 
@@ -21,3 +23,7 @@ Logout
 ### Setup
 
     python3 main.py
+
+### Under proxy
+
+    pip3 install PySocks
