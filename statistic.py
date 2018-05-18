@@ -15,6 +15,12 @@ class statistic:
     self.std_deviation = numpy.std(values)
     self.avg_value = numpy.mean(values)
 
+  def set_top_words_num(self, num):
+    self.top_words_num = num
+
+  def get_model(self):
+    return self.model
+
   def built_model(self, page_text_list):
     self.model = defaultdict(lambda: 0)
     for url, text in page_text_list.items():
@@ -29,7 +35,7 @@ class statistic:
     self.avg_value = numpy.mean(values)
 
     with open('models/model.json', 'w') as f:
-      json.dump(self.model, f, indent=4)
+      json.dump(self.model, f, indent=2)
 
   def stop_words(self):
     stop_word = list()

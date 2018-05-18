@@ -2,8 +2,10 @@ from telegram.ext import Updater
 from telegram.ext import MessageHandler
 from telegram.ext import Filters
 from telegram.ext import CommandHandler
+import matplotlib.pyplot as plt
 
 from statistic import statistic
+import describe
 import models.cmd_description as cmd_description
 import logging
 from url_parse import url_parse
@@ -35,35 +37,28 @@ class parse_bot:
 
   def deploy_handlers(self):
     start_handler = CommandHandler('start', self.start)
-    self.dispatcher.add_handler(start_handler)
-
     help_handler = CommandHandler('help', self.help)
-    self.dispatcher.add_handler(help_handler)
-
     parse_handler = CommandHandler('link', self.link, pass_args=True)
-    self.dispatcher.add_handler(parse_handler)
-
     depth_handler = CommandHandler('depth', self.depth, pass_args=True)
-    self.dispatcher.add_handler(depth_handler)
-
     reset_handler = CommandHandler('reset', self.reset)
-    self.dispatcher.add_handler(reset_handler)
-
     top_handler = CommandHandler('top', self.top, pass_args=True)
-    self.dispatcher.add_handler(top_handler)
-
     stop_words_handler = CommandHandler('stop_words', self.stop_words)
-    self.dispatcher.add_handler(stop_words_handler)
-
+    describe_handler = CommandHandler('describe', self.describe)
     stop_handler = CommandHandler('stop', self.stop)
-    self.dispatcher.add_handler(stop_handler)
-
     echo_handler = MessageHandler(Filters.text, self.echo)
-    self.dispatcher.add_handler(echo_handler)
-
-    self.dispatcher.add_error_handler(self.error)
-
     unknown_handler = MessageHandler(Filters.command, self.unknown)
+
+    self.dispatcher.add_handler(start_handler)
+    self.dispatcher.add_handler(help_handler)
+    self.dispatcher.add_handler(parse_handler)
+    self.dispatcher.add_handler(depth_handler)
+    self.dispatcher.add_handler(reset_handler)
+    self.dispatcher.add_handler(top_handler)
+    self.dispatcher.add_handler(echo_handler)
+    self.dispatcher.add_handler(stop_words_handler)
+    self.dispatcher.add_handler(describe_handler)
+    self.dispatcher.add_handler(echo_handler)
+    self.dispatcher.add_error_handler(self.error)
     self.dispatcher.add_handler(unknown_handler)
 
   def start(self, bot, update):
@@ -83,24 +78,32 @@ class parse_bot:
 
   def depth(self, bot, update, args):
     self.parser.set_depth(*args)
+    update.message.reply_text('Success. Depth value changed. /help')
 
   def reset(self, bot, update):
     self.parser.reset()
     update.message.reply_text('Success. Depth, link and stats reset to default. /help')
 
   def top(self, bot, update, args):
-    if args[0] == 'asc':
-      update.message.reply_text('Success. Here is the top words. /help\n' +
-                                '\n'.join([f'{key}, {value}' for
-                                  key, value in self.stat.top_asc().items()]))
-    elif args[0] == 'desc':
+    if len(args) > 1:
+      self.stat.set_top_words_num(int(args[0]))
+    if len(args) > 0 and args[-1] == 'desc':
       update.message.reply_text('Success. Here is the bot words. /help\n' +
                                 '\n'.join([f'{key}, {value}' for
                                   key, value in self.stat.top_desc().items()]))
+    else:
+      update.message.reply_text('Success. Here is the top words. /help\n' +
+                                '\n'.join([f'{key}, {value}' for
+                                  key, value in self.stat.top_asc().items()]))
 
   def stop_words(self, bot, update):
     update.message.reply_text('Success. Here is stop words. /help\n' +
                               '\n'.join(self.stat.stop_words()))
+
+  def describe(self, bot, update):
+    describe.draw_words_freq(self.stat.get_model())
+    describe.draw_words_length(self.stat.get_model())
+    update.message.reply_text('Success. Graphics saved. /help')
 
   def echo(self, bot, update):
     bot.send_message(chat_id=update.message.chat_id, text=update.message.text)
