@@ -44,6 +44,7 @@ class parse_bot:
     top_handler = CommandHandler('top', self.top, pass_args=True)
     stop_words_handler = CommandHandler('stop_words', self.stop_words)
     describe_handler = CommandHandler('describe', self.describe)
+    describe_word_handler = CommandHandler('describe_word', self.describe_word, pass_args=True)
     wordcloud_handler = CommandHandler('cloud', self.wordcloud)
     stop_handler = CommandHandler('stop', self.stop)
     echo_handler = MessageHandler(Filters.text, self.echo)
@@ -58,6 +59,7 @@ class parse_bot:
     self.dispatcher.add_handler(echo_handler)
     self.dispatcher.add_handler(stop_words_handler)
     self.dispatcher.add_handler(describe_handler)
+    self.dispatcher.add_handler(describe_word_handler)
     self.dispatcher.add_handler(wordcloud_handler)
     self.dispatcher.add_handler(echo_handler)
     self.dispatcher.add_error_handler(self.error)
@@ -108,6 +110,9 @@ class parse_bot:
     update.message.reply_text('Success. Graphics saved. /help')
     bot.sendPhoto(chat_id=update.message.chat_id, photo=open(cmd.WORDS_FREQ_IMG, 'rb'))
     bot.sendPhoto(chat_id=update.message.chat_id, photo=open(cmd.WORDS_LENGTH_IMG, 'rb'))
+
+  def describe_word(self, bot, update, args):
+    update.message.reply_text(describe.get_word_stat(self.stat.get_model(), args[0]))
 
   def wordcloud(self, bot, update):
     describe.draw_wordcloud(self.stat.get_model())

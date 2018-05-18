@@ -43,3 +43,15 @@ def draw_wordcloud(model):
   plt.axis("off")
   plt.savefig(cmd.WORDCLOUD_IMG)
   plt.clf()
+
+
+def get_word_stat(model, key):
+  print(key)
+  model = defaultdict(lambda: 0, model)
+  place = 1
+  freq = model[key]
+  for word, value in model.items():
+    if value > freq:
+      place += 1
+  print(f"This word {key!r} is repeated in site for {freq} and got {place} for popularity")
+  return f"This word {key!r} is repeated in site for {freq} and got {place} for popularity."
